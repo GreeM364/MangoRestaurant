@@ -1,4 +1,6 @@
-﻿using Mango.Services.ProductAPI.Data;
+﻿using AutoMapper;
+using Mango.Services.ProductAPI.Data;
+using Mango.Services.ProductAPI.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace Mango.Services.ProductAPI.Extensions
@@ -11,6 +13,12 @@ namespace Mango.Services.ProductAPI.Extensions
             {
                 opt.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
+
+            IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
+            services.AddSingleton(mapper);
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            services.AddScoped<IProductRepository, ProductRepository>();
 
             return services;
         }
