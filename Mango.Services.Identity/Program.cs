@@ -1,4 +1,5 @@
 using Mango.Services.Identity.Extensions;
+using Mango.Services.Identity.Initializer;
 
 // Add services to the container.
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +25,12 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseIdentityServer();
 app.UseAuthorization();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+    dbInitializer.Initialize();
+}
 
 app.MapControllerRoute(
     name: "default",
