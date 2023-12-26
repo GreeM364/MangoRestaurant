@@ -1,16 +1,9 @@
-using Mango.Web;
-using Mango.Web.Services;
-using Mango.Web.Services.IServices;
+using Mango.Web.Extensions;
 
 // Add services to the container.
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddHttpClient<IProductService, ProductService>();
-SD.ProductAPIBase = builder.Configuration["ServiceUrls:ProductAPI"]!;
-
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddControllersWithViews();
-
+builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.IdentityServices(builder.Configuration);
 
 // Configure the HTTP request pipeline.
 var app = builder.Build();
@@ -26,7 +19,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
