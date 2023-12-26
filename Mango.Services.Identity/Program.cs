@@ -1,11 +1,16 @@
-var builder = WebApplication.CreateBuilder(args);
+using Mango.Services.Identity.Extensions;
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+var builder = WebApplication.CreateBuilder(args);
 
-var app = builder.Build();
+builder.Services.AddControllersWithViews();
+builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddIdentityServices(builder.Configuration);
+
 
 // Configure the HTTP request pipeline.
+var app = builder.Build();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -17,7 +22,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseIdentityServer();
 app.UseAuthorization();
 
 app.MapControllerRoute(
