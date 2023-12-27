@@ -1,15 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Mango.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController()
         {
-            _logger = logger;
+            
         }
 
         public IActionResult Index()
@@ -18,8 +17,10 @@ namespace Mango.Web.Controllers
         }
 
         [Authorize]
-        public IActionResult Login()
+        public async Task<IActionResult> Login()
         {
+            var accessToken = await HttpContext.GetTokenAsync("access_token");
+
             return RedirectToAction(nameof(Index));
         }
 
