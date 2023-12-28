@@ -35,7 +35,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         }
 
         [HttpPost("AddCart")]
-        public async Task<object> AddCart(CartDto cartDto)
+        public async Task<object> AddCart([FromBody]CartDto cartDto)
         {
             try
             {

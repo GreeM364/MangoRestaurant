@@ -29,8 +29,8 @@ namespace Mango.Web.Services
                 client.DefaultRequestHeaders.Clear();
                 if (apiRequest.Data != null)
                 {
-                    message.Content = new StringContent(JsonConvert.SerializeObject(apiRequest.Data),
-                        Encoding.UTF8, "application/json");
+                    var tmp = JsonConvert.SerializeObject(apiRequest.Data);
+                    message.Content = new StringContent(tmp, Encoding.UTF8, "application/json");
                 }
 
                 if (!string.IsNullOrEmpty(apiRequest.AccessToken))
@@ -59,6 +59,7 @@ namespace Mango.Web.Services
                 var apiContent = await apiResponse.Content.ReadAsStringAsync();
                 var apiResponseDto = JsonConvert.DeserializeObject<T>(apiContent);
                 return apiResponseDto;
+
             }
             catch (Exception e)
             {
