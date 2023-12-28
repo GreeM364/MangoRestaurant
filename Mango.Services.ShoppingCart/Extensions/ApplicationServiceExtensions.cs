@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Mango.Services.ShoppingCartAPI.Data;
+using Mango.Services.ShoppingCartAPI.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace Mango.Services.ShoppingCartAPI.Extensions
@@ -14,6 +15,8 @@ namespace Mango.Services.ShoppingCartAPI.Extensions
             IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
             services.AddSingleton(mapper);
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            services.AddScoped<ICartRepository, CartRepository>();
 
             return services;
         }
