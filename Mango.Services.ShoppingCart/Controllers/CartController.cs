@@ -1,4 +1,5 @@
 ﻿using Mango.Services.ShoppingCartAPI.DTO;
+using Mango.Services.ShoppingCartAPI.Messages;
 using Mango.Services.ShoppingCartAPI.Repository;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +19,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         }
 
         [HttpGet("GetCart/{userId}")]
-        public async Task<object> GetCart(string userId)
+        public async Task<ResponseDto> GetCart(string userId)
         {
             try
             {
@@ -35,7 +36,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         }
 
         [HttpPost("AddCart")]
-        public async Task<object> AddCart([FromBody]CartDto cartDto)
+        public async Task<ResponseDto> AddCart([FromBody]CartDto cartDto)
         {
             try
             {
@@ -52,7 +53,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         }
 
         [HttpPut("UpdateCart")]
-        public async Task<object> UpdateCart(CartDto cartDto)
+        public async Task<ResponseDto> UpdateCart(CartDto cartDto)
         {
             try
             {
@@ -69,7 +70,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         }
 
         [HttpDelete("RemoveCart")]
-        public async Task<object> RemoveCart([FromBody]int cartId)
+        public async Task<ResponseDto> RemoveCart([FromBody]int cartId)
         {
             try
             {
@@ -86,7 +87,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         }
 
         [HttpDelete("ClearCart/{userId}")]
-        public async Task<object> ClearCart(string userId)
+        public async Task<ResponseDto> ClearCart(string userId)
         {
             try
             {
@@ -103,7 +104,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         }
 
         [HttpPost("ApplyCoupon")]
-        public async Task<object> ApplyCoupon([FromBody]CartDto cartDto)
+        public async Task<ResponseDto> ApplyCoupon([FromBody]CartDto cartDto)
         {
             try
             {
@@ -119,12 +120,36 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         }
 
         [HttpPost("RemoveCoupon")]
-        public async Task<object> RemoveCoupon([FromBody]string userId)
+        public async Task<ResponseDto> RemoveCoupon([FromBody]string userId)
         {
             try
             {
                 bool isSuccess = await _cartRepository.RemoveCoupon(userId);
                 _response.Result = isSuccess;
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorMessages = new List<string>() { ex.ToString() };
+            }
+            return _response;
+        }
+
+        [HttpPost("Checkout")]
+        public async Task<ResponseDto> Checkout(CheckoutHeaderDto checkoutHeaderDto)
+        {
+            try
+            {
+                CartDto cartDto = await _cartRepository.GetCartByUserId(checkoutHeaderDto.UserId);
+
+                if (cartDto == null)
+                {
+                    _response.IsSuccess = false;
+                    _response.ErrorMessages = new List<string>() { "Cart not found." };
+                    return _response;
+                }
+
+                checkoutHeaderDto.CartDetails = cartDto.CartDetails;
             }
             catch (Exception ex)
             {
