@@ -1,4 +1,4 @@
-using Mango.Services.ShoppingCartAPI.Extensions;
+using Mango.Services.OrderAPI.Extensions;
 
 // Add services to the container.
 var builder = WebApplication.CreateBuilder(args);
