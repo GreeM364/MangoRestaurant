@@ -1,4 +1,5 @@
 ﻿using Mango.Services.OrderAPI.Data;
+using Mango.Services.OrderAPI.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace Mango.Services.OrderAPI.Extensions
@@ -9,6 +10,10 @@ namespace Mango.Services.OrderAPI.Extensions
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+            var optionBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+            optionBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+            services.AddSingleton(new OrderRepository(optionBuilder.Options));
 
             return services;
         }
