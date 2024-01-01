@@ -2,6 +2,7 @@
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.DTO;
 using Mango.Services.ShoppingCartAPI.Models;
+using Mango.Services.ShoppingCartAPI.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 
 namespace Mango.Services.ShoppingCartAPI.Repository

@@ -1,7 +1,7 @@
 ﻿using Mango.MessageBus;
 using Mango.Services.ShoppingCartAPI.DTO;
 using Mango.Services.ShoppingCartAPI.Messages;
-using Mango.Services.ShoppingCartAPI.Repository;
+using Mango.Services.ShoppingCartAPI.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Mango.Services.ShoppingCartAPI.Controllers
