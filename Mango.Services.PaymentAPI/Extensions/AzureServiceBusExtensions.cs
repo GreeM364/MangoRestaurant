@@ -1,6 +1,6 @@
-﻿using Mango.Services.OrderAPI.Messaging;
+﻿using Mango.Services.PaymentAPI.Messaging;
 
-namespace Mango.Services.OrderAPI.Extensions
+namespace Mango.Services.PaymentAPI.Extensions
 {
     public static class AzureServiceBusExtensions
     {

@@ -182,6 +182,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 }
 
                 checkoutHeaderDto.CartDetails = cartDto.CartDetails;
+                checkoutHeaderDto.MessageCreated = DateTime.Now;
 
                 await _messageBus.PublishMessage(checkoutHeaderDto, "checkoutmessagetopic");
             }
