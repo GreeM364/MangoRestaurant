@@ -4,6 +4,7 @@ using Mango.MessageBus;
 using Mango.Services.OrderAPI.Messages;
 using Mango.Services.OrderAPI.Model;
 using Mango.Services.OrderAPI.Repository;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace Mango.Services.OrderAPI.Messaging
@@ -17,22 +18,25 @@ namespace Mango.Services.OrderAPI.Messaging
         private readonly string _subscriptionCheckOut;
         private readonly string _checkoutMessageTopic;
         private readonly string _orderPaymentProcessTopic;
+        private readonly string _orderUpdatePaymentResultTopic;
 
         private ServiceBusProcessor checkOutProcessor;
+        private ServiceBusProcessor orderUpdatePaymentStatusProcessor;
 
         public AzureServiceBusConsumer(OrderRepository orderRepository, IMessageBus messageBus, IConfiguration configuration)
         {
             _orderRepository = orderRepository;
             _messageBus = messageBus;
-            var configuration1 = configuration;
 
-            _serviceBusConnectionString = configuration1.GetValue<string>("ServiceBusConnectionString")!;
-            _subscriptionCheckOut = configuration1.GetValue<string>("SubscriptionCheckOut")!;
-            _checkoutMessageTopic = configuration1.GetValue<string>("CheckoutMessageTopic")!;
+            _serviceBusConnectionString = configuration.GetValue<string>("ServiceBusConnectionString")!;
+            _subscriptionCheckOut = configuration.GetValue<string>("SubscriptionCheckOut")!;
+            _checkoutMessageTopic = configuration.GetValue<string>("CheckoutMessageTopic")!;
             _orderPaymentProcessTopic = configuration.GetValue<string>("OrderPaymentProcessTopics")!;
+            _orderUpdatePaymentResultTopic = configuration.GetValue<string>("OrderUpdatePaymentResultTopic")!;
 
             var client = new ServiceBusClient(_serviceBusConnectionString);
             checkOutProcessor = client.CreateProcessor(_checkoutMessageTopic, _subscriptionCheckOut);
+            orderUpdatePaymentStatusProcessor = client.CreateProcessor(_orderUpdatePaymentResultTopic, _subscriptionCheckOut);
         }
 
         public async Task Start()
@@ -40,12 +44,19 @@ namespace Mango.Services.OrderAPI.Messaging
             checkOutProcessor.ProcessMessageAsync += OnCheckOutMessageReceived;
             checkOutProcessor.ProcessErrorAsync += ErrorHandler;
             await checkOutProcessor.StartProcessingAsync();
+
+            orderUpdatePaymentStatusProcessor.ProcessMessageAsync += OnOrderPaymentUpdateReceived;
+            orderUpdatePaymentStatusProcessor.ProcessErrorAsync += ErrorHandler;
+            await orderUpdatePaymentStatusProcessor.StartProcessingAsync();
         }
 
         public async Task Stop()
         {
             await checkOutProcessor.StopProcessingAsync();
             await checkOutProcessor.DisposeAsync();
+
+            await orderUpdatePaymentStatusProcessor.StopProcessingAsync();
+            await orderUpdatePaymentStatusProcessor.DisposeAsync();
         }
 
         private Task ErrorHandler(ProcessErrorEventArgs args)
@@ -108,6 +119,17 @@ namespace Mango.Services.OrderAPI.Messaging
             };
 
             await _messageBus.PublishMessage(paymentRequestMessage, _orderPaymentProcessTopic);
+            await args.CompleteMessageAsync(args.Message);
+        }
+
+        private async Task OnOrderPaymentUpdateReceived(ProcessMessageEventArgs args)
+        {
+            var message = args.Message;
+            var body = Encoding.UTF8.GetString(message.Body);
+
+            UpdatePaymentResultMessage paymentResultMessage = JsonConvert.DeserializeObject<UpdatePaymentResultMessage>(body);
+
+            await _orderRepository.UpdateOrderPaymentStatus(paymentResultMessage.OrderId, paymentResultMessage.Status);
             await args.CompleteMessageAsync(args.Message);
         }
     }
