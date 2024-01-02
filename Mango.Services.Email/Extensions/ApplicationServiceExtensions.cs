@@ -2,6 +2,7 @@
 using Mango.Services.Email.Messaging;
 using Mango.Services.Email.Repository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 namespace Mango.Services.Email.Extensions
 {
@@ -18,6 +19,11 @@ namespace Mango.Services.Email.Extensions
 
             services.AddSingleton<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
             services.AddScoped<IEmailRepository, EmailRepository>();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Mango.Services.Email", Version = "v1" });
+            });
 
             return services;
         }

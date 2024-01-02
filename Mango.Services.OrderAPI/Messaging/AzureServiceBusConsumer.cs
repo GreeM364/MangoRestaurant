@@ -4,7 +4,6 @@ using Mango.MessageBus;
 using Mango.Services.OrderAPI.Messages;
 using Mango.Services.OrderAPI.Model;
 using Mango.Services.OrderAPI.Repository;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace Mango.Services.OrderAPI.Messaging

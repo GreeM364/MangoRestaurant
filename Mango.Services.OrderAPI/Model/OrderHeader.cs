@@ -4,7 +4,7 @@
     {
         public int OrderHeaderId { get; set; }
         public string UserId { get; set; }
-        public string CouponCode { get; set; }
+        public string? CouponCode { get; set; }
         public double OrderTotal { get; set; }
         public double DiscountTotal { get; set; }
         public string FirstName { get; set; }
