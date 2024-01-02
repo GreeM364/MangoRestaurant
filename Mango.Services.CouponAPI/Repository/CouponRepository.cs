@@ -20,5 +20,12 @@ namespace Mango.Services.CouponAPI.Repository
             var couponFromDb = await _db.Coupons.FirstOrDefaultAsync(u => u.CouponCode == couponCode);
             return _mapper.Map<CouponDto>(couponFromDb);
         }
+
+        public async Task<bool> DoesCouponExist(string couponCode)
+        {
+            var doesExist = await _db.Coupons.AnyAsync(u => u.CouponCode == couponCode);
+            return doesExist;
+        }
+
     }
 }

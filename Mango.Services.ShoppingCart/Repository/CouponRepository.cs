@@ -26,5 +26,17 @@ namespace Mango.Services.ShoppingCartAPI.Repository
 
             return new CouponDto();
         }
+
+        public async Task<bool> DoesCouponExist(string couponName)
+        {
+            var response = await _client.GetAsync($"/api/coupon/exist/{couponName}");
+            var apiContent = await response.Content.ReadAsStringAsync();
+            var resp = JsonConvert.DeserializeObject<ResponseDto>(apiContent);
+
+            if (resp.IsSuccess)
+                return (bool)resp.Result;
+
+            return false;
+        }
     }
 }

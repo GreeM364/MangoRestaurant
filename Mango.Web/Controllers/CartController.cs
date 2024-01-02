@@ -60,7 +60,13 @@ namespace Mango.Web.Controllers
             try
             {
                 var accessToken = await HttpContext.GetTokenAsync("access_token");
-                await _cartService.Checkout<ResponseDto>(cartDto.CartHeader, accessToken);
+                var response = await _cartService.Checkout<ResponseDto>(cartDto.CartHeader, accessToken);
+
+                if (!response.IsSuccess)
+                {
+                    TempData["Error"] = response.DisplayMessage;
+                    return RedirectToAction(nameof(Checkout));
+                }
 
                 return RedirectToAction(nameof(Confirmation));
             }
@@ -120,8 +126,16 @@ namespace Mango.Web.Controllers
             {
                 return RedirectToAction(nameof(Index));
             }
+
+            if (!string.IsNullOrEmpty(response?.DisplayMessage))
+            {
+                TempData["Error"] = response.DisplayMessage;
+                return RedirectToAction(nameof(Index));
+            }
+
             return View();
         }
+
 
         [HttpPost]
         [ActionName("RemoveCoupon")]

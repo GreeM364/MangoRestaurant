@@ -32,5 +32,21 @@ namespace Mango.Services.CouponAPI.Controllers
             }
             return _response;
         }
+
+        [HttpGet("exist/{code}")]
+        public async Task<ResponseDto> DoesCouponExist(string code)
+        {
+            try
+            {
+                var doesExist = await _couponRepository.DoesCouponExist(code);
+                _response.Result = doesExist;
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorMessages = new List<string>() { ex.ToString() };
+            }
+            return _response;
+        }
     }
 }

@@ -11,12 +11,14 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
     public class CartController : Controller
     {
         private readonly ICartRepository _cartRepository;
+        private readonly ICouponRepository _couponRepository;
         private readonly IMessageBus _messageBus;
         protected ResponseDto _response;
 
-        public CartController(ICartRepository cartRepository, IMessageBus messageBus)
+        public CartController(ICartRepository cartRepository, ICouponRepository couponRepository, IMessageBus messageBus)
         {
             _cartRepository = cartRepository;
+            _couponRepository = couponRepository;
             _messageBus = messageBus;
             _response = new ResponseDto();
         }
@@ -107,20 +109,34 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         }
 
         [HttpPost("ApplyCoupon")]
-        public async Task<ResponseDto> ApplyCoupon([FromBody]CartDto cartDto)
+        public async Task<ResponseDto> ApplyCoupon([FromBody] CartDto cartDto)
         {
             try
             {
-                bool isSuccess = await _cartRepository.ApplyCoupon(cartDto.CartHeader.UserId, cartDto.CartHeader.CouponCode);
-                _response.Result = isSuccess;
+                var couponCode = cartDto.CartHeader.CouponCode;
+                bool doesExist = await _couponRepository.DoesCouponExist(couponCode);
+
+                if (doesExist)
+                {
+                    bool isSuccess = await _cartRepository.ApplyCoupon(cartDto.CartHeader.UserId, couponCode);
+                    _response.Result = isSuccess;
+                }
+                else
+                {
+                    _response.IsSuccess = false;
+                    _response.ErrorMessages = new List<string> { "Coupon does not exist" };
+                    _response.DisplayMessage = "Coupon does not exist";
+                }
             }
             catch (Exception ex)
             {
                 _response.IsSuccess = false;
-                _response.ErrorMessages = new List<string>() { ex.ToString() };
+                _response.ErrorMessages = new List<string> { ex.Message };
             }
+
             return _response;
         }
+
 
         [HttpPost("RemoveCoupon")]
         public async Task<ResponseDto> RemoveCoupon([FromBody]string userId)
@@ -150,6 +166,19 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                     _response.IsSuccess = false;
                     _response.ErrorMessages = new List<string>() { "Cart not found." };
                     return _response;
+                }
+
+                if (!string.IsNullOrEmpty(checkoutHeaderDto.CouponCode))
+                {
+                    CouponDto coupon = await _couponRepository.GetCoupon(checkoutHeaderDto.CouponCode);
+
+                    if (checkoutHeaderDto.DiscountTotal != coupon.DiscountAmount)
+                    {
+                        _response.IsSuccess = false;
+                        _response.ErrorMessages = new List<string>() { "Coupon Price has changed, please confirm" };
+                        _response.DisplayMessage = "Coupon Price has changed, please confirm";
+                        return _response;
+                    }
                 }
 
                 checkoutHeaderDto.CartDetails = cartDto.CartDetails;
