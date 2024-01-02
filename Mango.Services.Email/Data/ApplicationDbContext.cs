@@ -1,0 +1,10 @@
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Mango.Services.Email.Data
+{
+    public class ApplicationDbContext : DbContext
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        { }
+    }
+}

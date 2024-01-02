@@ -63,6 +63,7 @@ namespace Mango.Services.PaymentAPI.Messaging
             {
                 Status = result,
                 OrderId = paymentRequestMessage.OrderId,
+                Email = paymentRequestMessage.Email,
                 MessageCreated = DateTime.Now
             };
 
