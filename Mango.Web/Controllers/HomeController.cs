@@ -34,7 +34,7 @@ namespace Mango.Web.Controllers
             ProductDto product = new ProductDto();
             var response = await _productService.GetProductByIdAsync<ResponseDto>(productId, "");
 
-            if (response.IsSuccess)
+            if (response != null && response.IsSuccess)
                 product = JsonConvert.DeserializeObject<ProductDto>(Convert.ToString(response.Result));
 
             return View(product);
