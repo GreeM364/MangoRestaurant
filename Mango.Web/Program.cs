@@ -2,8 +2,9 @@ using Mango.Web.Extensions;
 
 // Add services to the container.
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddApplicationServices(builder.Configuration);
-builder.Services.IdentityServices(builder.Configuration);
+builder.Services.AddIdentityServices(builder.Configuration);
 
 // Configure the HTTP request pipeline.
 var app = builder.Build();
