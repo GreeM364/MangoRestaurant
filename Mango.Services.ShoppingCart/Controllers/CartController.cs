@@ -1,6 +1,6 @@
-﻿using Mango.MessageBus;
-using Mango.Services.ShoppingCartAPI.DTO;
+﻿using Mango.Services.ShoppingCartAPI.DTO;
 using Mango.Services.ShoppingCartAPI.Messages;
+using Mango.Services.ShoppingCartAPI.RabbitMQSender;
 using Mango.Services.ShoppingCartAPI.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,14 +12,14 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
     {
         private readonly ICartRepository _cartRepository;
         private readonly ICouponRepository _couponRepository;
-        private readonly IMessageBus _messageBus;
+        private readonly IRabbitMQCartMessageSender _rabbitmqSender;
         protected ResponseDto _response;
 
-        public CartController(ICartRepository cartRepository, ICouponRepository couponRepository, IMessageBus messageBus)
+        public CartController(ICartRepository cartRepository, ICouponRepository couponRepository, IRabbitMQCartMessageSender rabbitmqSender)
         {
             _cartRepository = cartRepository;
             _couponRepository = couponRepository;
-            _messageBus = messageBus;
+            _rabbitmqSender = rabbitmqSender;
             _response = new ResponseDto();
         }
 
@@ -184,7 +184,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 checkoutHeaderDto.CartDetails = cartDto.CartDetails;
                 checkoutHeaderDto.MessageCreated = DateTime.Now;
 
-                await _messageBus.PublishMessage(checkoutHeaderDto, "checkoutmessagetopic");
+                _rabbitmqSender.SendMessage(checkoutHeaderDto, "checkoutmessagetopic");
                 await _cartRepository.ClearCart(checkoutHeaderDto.UserId);
             }
             catch (Exception ex)
