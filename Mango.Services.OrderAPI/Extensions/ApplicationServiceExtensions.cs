@@ -1,5 +1,4 @@
-﻿using Mango.MessageBus;
-using Mango.Services.OrderAPI.Data;
+﻿using Mango.Services.OrderAPI.Data;
 using Mango.Services.OrderAPI.Messaging;
 using Mango.Services.OrderAPI.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +16,7 @@ namespace Mango.Services.OrderAPI.Extensions
             optionBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             services.AddSingleton(new OrderRepository(optionBuilder.Options));
 
-            services.AddSingleton<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
-            services.AddSingleton<IMessageBus, AzureServiceBusMessageBus>();
+            services.AddHostedService<RabbitMQCheckoutConsumer>();
 
             return services;
         }
