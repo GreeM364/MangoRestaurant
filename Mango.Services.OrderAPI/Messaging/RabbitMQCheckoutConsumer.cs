@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Mango.Services.OrderAPI.Messages;
 using Mango.Services.OrderAPI.Model;
+using Mango.Services.OrderAPI.RabbitMQSender;
 using Mango.Services.OrderAPI.Repository;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
@@ -11,14 +12,18 @@ namespace Mango.Services.OrderAPI.Messaging
     public class RabbitMQCheckoutConsumer : BackgroundService
     {
         private readonly OrderRepository _orderRepository;
-        private readonly string _checkoutMessageTopic;
+        private readonly IRabbitMQOrderMessageSender _rabbitmqSender;
+        private readonly string _checkoutMessageQueue;
+        private readonly string _orderPaymentProcessQueue;
         private IConnection _connection;
         private IModel _channel;
 
-        public RabbitMQCheckoutConsumer(OrderRepository orderRepository, IConfiguration configuration)
+        public RabbitMQCheckoutConsumer(OrderRepository orderRepository, IConfiguration configuration, IRabbitMQOrderMessageSender rabbitmqSender)
         {
             _orderRepository = orderRepository;
-            _checkoutMessageTopic = configuration["CheckoutMessageTopic"]!;
+            _rabbitmqSender = rabbitmqSender;
+            _checkoutMessageQueue = configuration["CheckoutMessageQueue"]!;
+            _orderPaymentProcessQueue = configuration["OrderPaymentProcessQueue"]!;
 
             var factory = new ConnectionFactory
             {
@@ -30,7 +35,7 @@ namespace Mango.Services.OrderAPI.Messaging
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
 
-            _channel.QueueDeclare(queue: _checkoutMessageTopic, false, false, false, arguments: null);
+            _channel.QueueDeclare(queue: _checkoutMessageQueue, false, false, false, arguments: null);
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -46,7 +51,7 @@ namespace Mango.Services.OrderAPI.Messaging
                 _channel.BasicAck(e.DeliveryTag, false);
             };
 
-            _channel.BasicConsume(_checkoutMessageTopic, false, consumer);
+            _channel.BasicConsume(_checkoutMessageQueue, false, consumer);
 
             return Task.CompletedTask;
         }
@@ -97,6 +102,7 @@ namespace Mango.Services.OrderAPI.Messaging
                 Email = orderHeader.Email
             };
 
+            _rabbitmqSender.SendMessage(paymentRequestMessage, _orderPaymentProcessQueue);
         }
     }
 }

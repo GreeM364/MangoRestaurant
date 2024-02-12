@@ -1,5 +1,6 @@
 ﻿using Mango.Services.OrderAPI.Data;
 using Mango.Services.OrderAPI.Messaging;
+using Mango.Services.OrderAPI.RabbitMQSender;
 using Mango.Services.OrderAPI.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,7 @@ namespace Mango.Services.OrderAPI.Extensions
             services.AddSingleton(new OrderRepository(optionBuilder.Options));
 
             services.AddHostedService<RabbitMQCheckoutConsumer>();
+            services.AddSingleton<IRabbitMQOrderMessageSender, RabbitMQOrderMessageSender>();
 
             return services;
         }
