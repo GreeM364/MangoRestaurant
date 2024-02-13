@@ -17,8 +17,8 @@ namespace Mango.Services.Email.Extensions
             optionBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             services.AddSingleton(new EmailRepository(optionBuilder.Options));
 
-            services.AddSingleton<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
             services.AddScoped<IEmailRepository, EmailRepository>();
+            services.AddHostedService<RabbitMQPaymentConsumer>();
 
             services.AddSwaggerGen(c =>
             {

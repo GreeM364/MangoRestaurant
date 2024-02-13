@@ -17,6 +17,7 @@ namespace Mango.Services.OrderAPI.Extensions
             optionBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             services.AddSingleton(new OrderRepository(optionBuilder.Options));
 
+            services.AddHostedService<RabbitMQPaymentConsumer>();
             services.AddHostedService<RabbitMQCheckoutConsumer>();
             services.AddSingleton<IRabbitMQOrderMessageSender, RabbitMQOrderMessageSender>();
 
